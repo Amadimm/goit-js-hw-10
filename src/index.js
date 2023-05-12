@@ -1,65 +1,16 @@
 import './css/styles.css';
-import { fetchCountries } from './fetchCountries.js';
-import Notiflix from 'notiflix';
-import debounce from 'lodash.debounce';
+import { fetchCountries } from './fetchCountries';
+
+const debounce = require('lodash.debounce');
+
+const searchEl = document.getElementById('search-box');
 
 const DEBOUNCE_DELAY = 300;
-const inputEl = document.getElementById('search-box');
-const countryList = document.querySelector('.country-list');
-const countryInfo = document.querySelector('.country-info');
 
-const clearInput = () => {
-  countryList.innerHTML = '';
-  countryInfo.innerHTML = '';
-};
-
-inputEl.addEventListener(
+searchEl.addEventListener(
   'input',
-  debounce(async event => {
-    const countryName = event.target.value.trim();
-
-    if (countryName === ' ') {
-      clearInput();
-      return;
-    }
-
-    const countryArray = await fetchCountries(countryName);
-    console.log(Array.isArray(countryArray));
-
-    if (countryArray.length > 10) {
-      Notiflix.Notify.info(
-        'Too many matches found. Please enter a more specific name.'
-      );
-      clearInput();
-    } else {
-      countryList.innerHTML = countryArray.map(
-          country => `<li  class="inline-item">
-          <img src="${country.flags.svg}" width="50" height= "30"alt = "Flag of ${country.name.official}"/>
-           <p> <b>${country.name.official}</p></b> </li>
-                  `
-        )
-        .join('');
-    }
-
-    if (countryArray.length === 1) {
-      clearInput();
-      countryInfo.innerHTML = countryArray.map(
-          country =>
-              
-            `<li class= "country-info">
-    <img  src="${country.flags.svg}" width="100" alt = "Flag of ${
-              country.name.official
-            }"/>
-    <p class = "one-country" ><b> ${country.name.official}</b></p>
-    <p><b>Capital:  ${country.capital}</b></p>
-    <p><b>Population:  ${country.population}</b></p>
-    <p><b>Languages: ${Object.values(country.languages).join(', ')}</b></p>
-    </li>`
-          
-        )
-        .join(', ');
-    }
-  }),
-  DEBOUNCE_DELAY
+  debounce(name => {
+    name = searchEl.value;
+    fetchCountries(name);
+  }, DEBOUNCE_DELAY)
 );
-
